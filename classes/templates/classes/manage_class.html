@@ -1,0 +1,509 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage | {{ class_obj.name }}</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --space-black: #0b0d17;
+            --star-gold: #ffc107;
+            --star-blue: #0dcaf0;
+            --card-bg: #161b22;
+            --border-color: #30363d;
+        }
+
+        body { background-color: var(--space-black); color: #f0f0f0; font-family: 'Inter', sans-serif; }
+        .manage-header { background: linear-gradient(180deg, rgba(255,193,7,0.1) 0%, rgba(11,13,23,1) 100%); padding: 40px 0; border-bottom: 1px solid var(--border-color); }
+        .glass-card { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 15px; padding: 25px; height: 100%; }
+        .form-control, .form-select { background-color: rgba(0, 0, 0, 0.2); border: 1px solid var(--border-color); color: white; }
+        .form-control:focus { background-color: rgba(0, 0, 0, 0.4); border-color: var(--star-gold); color: white; box-shadow: none; }
+        .nav-pills .nav-link { color: #8b949e; border-radius: 8px; margin-right: 5px; }
+        .nav-pills .nav-link.active { background-color: var(--star-gold); color: var(--space-black); font-weight: bold; }
+        
+        .question-item, .lecture-item { border-left: 3px solid var(--border-color); transition: 0.3s; margin-bottom: 10px; }
+        .question-item:hover { border-left-color: var(--star-gold); background: rgba(255,255,255,0.02); }
+        .lecture-item:hover { border-left-color: var(--star-blue); background: rgba(255,255,255,0.02); }
+        
+        .quiz-container { border: 1px solid var(--border-color); border-radius: 10px; overflow: hidden; margin-bottom: 20px; }
+        .quiz-header { background: rgba(255,255,255,0.05); padding: 15px; border-bottom: 1px solid var(--border-color); }
+        .resource-bay { background: rgba(0,0,0,0.3); padding: 15px; border-radius: 10px; border: 1px dashed var(--border-color); }
+        
+        input[type="datetime-local"] {
+            color-scheme: dark;
+            position: relative;
+        }
+        input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+            cursor: pointer;
+            filter: invert(0.8) sepia(100%) saturate(1000%) hue-rotate(10deg);
+        }
+
+        .preview-tray { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
+        .mini-preview { 
+            width: 100px; height: 100px; background: #000; border: 1px solid var(--border-color); 
+            border-radius: 8px; overflow: hidden; display: flex; align-items: center; justify-content: center;
+        }
+        .mini-preview img, .mini-preview video { width: 100%; height: 100%; object-fit: cover; }
+        .preview-icon { font-size: 2rem; color: #8b949e; }
+        
+        .modal-content { background-color: var(--card-bg); border: 1px solid var(--border-color); color: white; }
+        .modal-header { border-bottom: 1px solid var(--border-color); }
+        .modal-footer { border-top: 1px solid var(--border-color); }
+        .tiny { font-size: 0.75rem; }
+    </style>
+</head>
+<body>
+
+<header class="manage-header mb-5">
+    <div class="container d-flex justify-content-between align-items-start">
+        <div>
+            <a href="{% url 'classes:index' %}" class="text-warning text-decoration-none mb-3 d-inline-block">
+                <i class="bi bi-arrow-left"></i> Back to Dashboard
+            </a>
+            <h1 class="display-6 fw-bold text-white">Mission Control: <span class="text-warning">{{ class_obj.name }}</span></h1>
+        </div>
+        <div class="text-end">
+            <p class="small text-secondary mb-2">Authenticated: {{ user.username }}</p>
+            <form action="{% url 'classes:profile_settings' request.user.pk %}" method="post">
+                {% csrf_token %}
+                <button type="submit" class="your-button-styles">
+                    Profile Settings
+                </button>
+            </form>
+
+            <form action="{% url 'classes:log_out' %}" method="post">
+                {% csrf_token %}
+                <button type="submit" class="your-button-styles">
+                    Log Out
+                </button>
+            </form>
+        </div>
+    </div>
+</header>
+
+<main class="container mb-5">
+    <div class="row g-4">
+        <div class="col-lg-4">
+            <div class="glass-card mb-4">
+                <h3 class="h5 text-warning mb-4"><i class="bi bi-gear-fill me-2"></i>Class Settings</h3>
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label text-secondary small">Class Name</label>
+                        <input type="text" name="name" class="form-control" value="{{ class_obj.name }}">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-secondary small">Description</label>
+                        <textarea name="description" class="form-control" rows="4">{{ class_obj.description }}</textarea>
+                    </div>
+                    <button type="submit" name="manage" value="change" class="btn btn-warning w-100 fw-bold">Update System</button>
+                </form>
+            </div>
+            
+            <div class="glass-card">
+                <h3 class="h6 text-danger mb-3">Emergency Protocol</h3>
+                <form method="POST" onsubmit="return confirm('Delete this class and all data?');">
+                    {% csrf_token %}
+                    <button type="submit" name="manage" value="delete" class="btn btn-outline-danger btn-sm w-100">Delete Class</button>
+                </form>
+
+                {% for student in students %}
+                   <ul class="mt-3 list-unstyled">
+                        <li class="d-flex justify-content-between align-items-center mb-2">
+                            <span>{{ student.username }}</span>
+                            <form action="{% url 'classes:dismiss' class_obj.pk student.pk %}" 
+                                  method="POST" 
+                                  onsubmit="return confirm('Are you sure you want to dismiss {{ student.username }} from this class?');">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-outline-danger">Dismiss</button>
+                            </form>
+                        </li>
+                    </ul>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="col-lg-8">
+            <div class="glass-card">
+                <ul class="nav nav-pills mb-4" id="pills-tab" role="tablist">
+                    <li class="nav-item"><button class="nav-link active" data-bs-toggle="pill" data-bs-target="#quiz-content">Quizzes</button></li>
+                    <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#lecture-content">Lectures</button></li>
+                    <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#announcement-content">Announcements</button></li>
+                    <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#assign-content">Cadets</button></li>
+                </ul>
+
+                <div class="tab-content">
+                    <div class="tab-pane fade show active" id="quiz-content">
+                        <div class="mb-5 p-3 rounded border border-warning border-opacity-25" style="background: rgba(255,193,7,0.05)">
+                            <h4 class="h6 text-warning mb-3"><i class="bi bi-plus-square me-2"></i>Initialize New Quiz</h4>
+                            <form method="POST" class="row g-2 align-items-end">
+                                {% csrf_token %}
+                                <div class="col-md-5">
+                                    <label class="tiny text-secondary mb-1">Mission Title</label>
+                                    <input type="text" name="quiz_title" class="form-control" placeholder="Quiz Title" required>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="tiny text-secondary mb-1">Due Date (Local Time)</label>
+                                    <input type="datetime-local" name="due_date" class="form-control">
+                                </div>
+                                <div class="col-md-3">
+                                    <button type="submit" name="manage" value="create_quiz_container" class="btn btn-warning w-100 fw-bold">Create</button>
+                                </div>
+                            </form>
+                        </div>
+
+                        {% for quiz in quizzes %}
+                        <div class="quiz-container">
+                            <div class="quiz-header d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h5 class="mb-0 text-white">{{ quiz.title }}</h5>
+                                    <div class="d-flex gap-3">
+                                        <small class="text-secondary">{{ quiz.questions.count }} Questions</small>
+                                        {% if quiz.due_date %}
+                                        <small class="text-warning tiny"><i class="bi bi-clock me-1"></i>Due: {{ quiz.due_date|date:"M d, H:i" }}</small>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <button class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#editQuiz{{ quiz.id }}"><i class="bi bi-gear"></i></button>
+                                    <form method="POST">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="quiz_id" value="{{ quiz.id }}">
+                                        <button type="submit" name="manage" value="toggle_quiz" class="btn btn-sm {% if quiz.is_published %}btn-success{% else %}btn-outline-secondary{% endif %}">
+                                            {% if quiz.is_published %}Live{% else %}Draft{% endif %}
+                                        </button>
+                                    </form>
+                                    <form method="POST" onsubmit="return confirm('Permanently delete this quiz?');">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="quiz_id" value="{{ quiz.id }}">
+                                        <button type="submit" name="manage" value="delete_quiz" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+                                    </form>
+                                    <button class="btn btn-sm btn-outline-warning" data-bs-toggle="collapse" data-bs-target="#quiz-{{ quiz.id }}">Questions</button>
+                                </div>
+                            </div>
+
+                            <div class="modal fade" id="editQuiz{{ quiz.id }}" tabindex="-1" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header"><h5 class="modal-title text-warning">Edit Quiz Details</h5></div>
+                                        <form method="POST">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="quiz_id" value="{{ quiz.id }}">
+                                            <div class="modal-body">
+                                                <div class="mb-3">
+                                                    <label class="small text-secondary">Title</label>
+                                                    <input type="text" name="edit_quiz_title" class="form-control" value="{{ quiz.title }}" required>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="small text-secondary">Due Date</label>
+                                                    <input type="datetime-local" name="edit_due_date" class="form-control" value="{{ quiz.due_date|date:'Y-m-d\TH:i' }}">
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                                                <button type="submit" name="manage" value="update_quiz_meta" class="btn btn-warning btn-sm">Save Changes</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="collapse p-3 bg-black bg-opacity-25" id="quiz-{{ quiz.id }}">
+                                <form method="POST" class="mb-3 border-bottom border-secondary pb-3">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="quiz_id" value="{{ quiz.id }}">
+                                    <div class="row g-2">
+                                        <div class="col-12"><input type="text" name="question_prompt" class="form-control form-control-sm" placeholder="Question?" required></div>
+                                        <div class="col-md-6"><input type="text" name="option_a" class="form-control form-control-sm" placeholder="A" required></div>
+                                        <div class="col-md-6"><input type="text" name="option_b" class="form-control form-control-sm" placeholder="B" required></div>
+                                        <div class="col-md-6"><input type="text" name="option_c" class="form-control form-control-sm" placeholder="C" required></div>
+                                        <div class="col-md-6"><input type="text" name="option_d" class="form-control form-control-sm" placeholder="D" required></div>
+                                        <div class="col-md-8">
+                                            <select name="correct_choice" class="form-select form-select-sm">
+                                                <option value="A">Answer: A</option><option value="B">Answer: B</option>
+                                                <option value="C">Answer: C</option><option value="D">Answer: D</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-4"><button type="submit" name="manage" value="add_question" class="btn btn-warning btn-sm w-100">Add</button></div>
+                                    </div>
+                                </form>
+
+                                {% for q in quiz.questions.all %}
+                                <div class="question-item p-2 rounded bg-dark border border-secondary d-flex justify-content-between mb-1">
+                                    <span class="small">{{ forloop.counter }}. {{ q.prompt }}</span>
+                                    <div class="d-flex gap-2">
+                                        <button class="btn btn-link text-info p-0" data-bs-toggle="modal" data-bs-target="#editQuest{{ q.id }}"><i class="bi bi-pencil"></i></button>
+                                        <form method="POST">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="question_id" value="{{ q.id }}">
+                                            <button name="manage" value="delete_question" class="btn btn-link text-danger p-0"><i class="bi bi-x-circle"></i></button>
+                                        </form>
+                                    </div>
+                                </div>
+
+                                <div class="modal fade" id="editQuest{{ q.id }}" tabindex="-1" aria-hidden="true">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header"><h5 class="modal-title text-warning">Edit Question</h5></div>
+                                            <form method="POST">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="question_id" value="{{ q.id }}">
+                                                <div class="modal-body">
+                                                    <div class="mb-2"><label class="tiny text-secondary">Prompt</label><input type="text" name="edit_prompt" class="form-control" value="{{ q.prompt }}"></div>
+                                                    <div class="row g-2">
+                                                        <div class="col-6"><label class="tiny text-secondary">A</label><input type="text" name="edit_a" class="form-control" value="{{ q.option_a }}"></div>
+                                                        <div class="col-6"><label class="tiny text-secondary">B</label><input type="text" name="edit_b" class="form-control" value="{{ q.option_b }}"></div>
+                                                        <div class="col-6"><label class="tiny text-secondary">C</label><input type="text" name="edit_c" class="form-control" value="{{ q.option_c }}"></div>
+                                                        <div class="col-6"><label class="tiny text-secondary">D</label><input type="text" name="edit_d" class="form-control" value="{{ q.option_d }}"></div>
+                                                        <div class="col-12"><label class="tiny text-secondary">Correct Answer</label>
+                                                            <select name="edit_correct" class="form-select">
+                                                                <option value="A" {% if q.answer == 'A' %}selected{% endif %}>A</option>
+                                                                <option value="B" {% if q.answer == 'B' %}selected{% endif %}>B</option>
+                                                                <option value="C" {% if q.answer == 'C' %}selected{% endif %}>C</option>
+                                                                <option value="D" {% if q.answer == 'D' %}selected{% endif %}>D</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                                                    <button type="submit" name="manage" value="update_question" class="btn btn-warning btn-sm">Update Question</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="tab-pane fade" id="lecture-content">
+                        <div class="mb-5 p-4 rounded border border-info border-opacity-25" style="background: rgba(13,202,240,0.05)">
+                            <h4 class="h6 text-info mb-4"><i class="bi bi-journal-plus me-2"></i>New Lecture Briefing</h4>
+                            <form method="POST" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                <div class="row g-3">
+                                    <div class="col-12"><input type="text" name="lecture_title" class="form-control" placeholder="Lecture Title" required></div>
+                                    <div class="col-12"><textarea name="lecture_content" class="form-control" rows="3" placeholder="Optional notes..."></textarea></div>
+                                    <div class="col-12">
+                                        <p class="small text-info mb-2">Resource Bay (Optional Files)</p>
+                                        <div class="resource-bay">
+                                            <div class="row g-2">
+                                                <div class="col-md-6"><input type="file" name="file_1" class="form-control form-control-sm"></div>
+                                                <div class="col-md-6"><input type="file" name="file_2" class="form-control form-control-sm"></div>
+                                                <div class="col-md-6"><input type="file" name="file_3" class="form-control form-control-sm"></div>
+                                                <div class="col-md-6"><input type="file" name="file_4" class="form-control form-control-sm"></div>
+                                                <div class="col-md-6"><input type="file" name="file_5" class="form-control form-control-sm"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6"><label class="small text-info">Video</label><input type="file" name="lecture_video" class="form-control" accept="video/*"></div>
+                                    <div class="col-md-6"><label class="small text-secondary">Link</label><input type="url" name="lecture_link" class="form-control" placeholder="https://..."></div>
+                                    <div class="col-12"><button type="submit" name="manage" value="add_lecture" class="btn btn-info w-100 fw-bold">Broadcast Lecture</button></div>
+                                </div>
+                            </form>
+                        </div>
+
+                        {% for lecture in lectures %}
+                        <div class="lecture-item p-3 rounded bg-dark border border-secondary mb-3">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <h6 class="mb-1 text-info">{{ lecture.title }}</h6>
+                                    <div class="d-flex gap-2">
+                                        <span class="badge bg-secondary">{{ lecture.get_file_count }} Files</span>
+                                        {% if lecture.video_file %}<span class="badge bg-primary">Video</span>{% endif %}
+                                    </div>
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <button type="button" class="btn btn-link text-warning p-0" data-bs-toggle="modal" data-bs-target="#editLect{{ lecture.id }}">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </button>
+                                    <form method="POST" onsubmit="return confirm('Delete Lecture?');">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="lecture_id" value="{{ lecture.id }}">
+                                        <button type="submit" name="manage" value="delete_lecture" class="btn btn-link text-danger p-0"><i class="bi bi-trash"></i></button>
+                                    </form>
+                                </div>
+                            </div>
+
+                            <div class="preview-tray">
+                                {% if lecture.video_file %}
+                                    <div class="mini-preview">
+                                        <video muted preload="metadata"><source src="{{ lecture.video_file.url }}#t=0.5"></video>
+                                    </div>
+                                {% endif %}
+                                {% if lecture.file_1 %}<div class="mini-preview"><img src="{{ lecture.file_1.url }}" onerror="handleBroken(this)"></div>{% endif %}
+                                {% if lecture.file_2 %}<div class="mini-preview"><img src="{{ lecture.file_2.url }}" onerror="handleBroken(this)"></div>{% endif %}
+                                {% if lecture.file_3 %}<div class="mini-preview"><img src="{{ lecture.file_3.url }}" onerror="handleBroken(this)"></div>{% endif %}
+                                {% if lecture.file_4 %}<div class="mini-preview"><img src="{{ lecture.file_4.url }}" onerror="handleBroken(this)"></div>{% endif %}
+                                {% if lecture.file_5 %}<div class="mini-preview"><img src="{{ lecture.file_5.url }}" onerror="handleBroken(this)"></div>{% endif %}
+                            </div>
+                        </div>
+
+                        <div class="modal fade" id="editLect{{ lecture.id }}" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog modal-lg">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title text-warning">Edit Lecture: {{ lecture.title }}</h5>
+                                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <form method="POST" enctype="multipart/form-data">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="lecture_id" value="{{ lecture.id }}">
+                                        <div class="modal-body">
+                                            <div class="mb-3">
+                                                <label class="form-label small text-secondary">Title</label>
+                                                <input type="text" name="edit_title" class="form-control" value="{{ lecture.title }}">
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="form-label small text-secondary">Content</label>
+                                                <textarea name="edit_content" class="form-control" rows="3">{{ lecture.content }}</textarea>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="form-label small text-secondary">Link</label>
+                                                <input type="url" name="edit_link" class="form-control" value="{{ lecture.link }}">
+                                            </div>
+                                            <div class="resource-bay">
+                                                <p class="small text-info mb-2">Resource Update (Overwrites existing files)</p>
+                                                <div class="row g-2">
+                                                    <div class="col-md-6"><input type="file" name="file_1" class="form-control form-control-sm"></div>
+                                                    <div class="col-md-6"><input type="file" name="file_2" class="form-control form-control-sm"></div>
+                                                    <div class="col-md-6"><input type="file" name="file_3" class="form-control form-control-sm"></div>
+                                                    <div class="col-md-6"><input type="file" name="file_4" class="form-control form-control-sm"></div>
+                                                    <div class="col-md-6"><input type="file" name="file_5" class="form-control form-control-sm"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                            <button type="submit" name="manage" value="update_lecture" class="btn btn-warning">Save Changes</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="tab-pane fade" id="announcement-content">
+                        <div class="mb-5 p-4 rounded border border-info border-opacity-25" style="background: rgba(13,202,240,0.05)">
+                            <h4 class="h6 text-info mb-4"><i class="bi bi-megaphone-fill me-2"></i>New Fleet Broadcast</h4>
+                            <form method="POST">
+                                {% csrf_token %}
+                                <div class="row g-3">
+                                    <div class="col-12">
+                                        <input type="text" name="announcement_title" class="form-control" placeholder="Subject Headline" required>
+                                    </div>
+                                    <div class="col-12">
+                                        <textarea name="announcement_body" class="form-control" rows="3" placeholder="Transmission details..." required></textarea>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-check form-switch mt-2">
+                                            <input class="form-check-input" type="checkbox" name="is_live" id="liveSwitch" checked>
+                                            <label class="form-check-label small text-secondary" for="liveSwitch">Go Live Immediately</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 text-end">
+                                        <button type="submit" name="manage" value="add_announcement" class="btn btn-info w-100 fw-bold">Send Broadcast</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+
+                        {% for announcement in announcements %}
+                        <div class="lecture-item p-3 rounded bg-dark border {% if announcement.is_live %}border-info{% else %}border-secondary{% endif %} mb-3">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <h6 class="mb-1 {% if announcement.is_live %}text-info{% else %}text-secondary{% endif %}">
+                                        {{ announcement.title }}
+                                        {% if not announcement.is_live %}
+                                            <span class="badge bg-dark text-secondary border border-secondary ms-2 tiny">DRAFT</span>
+                                        {% endif %}
+                                    </h6>
+                                    <p class="small text-white-50 mb-0">{{ announcement.body }}</p>
+                                    <small class="text-secondary tiny">{{ announcement.created_at|date:"M d, H:i" }}</small>
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <form method="POST">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="announcement_id" value="{{ announcement.id }}">
+                                        <button type="submit" name="manage" value="toggle_announcement" class="btn btn-link p-0 text-info">
+                                            <i class="bi {% if announcement.is_live %}bi-eye-slash{% else %}bi-eye{% endif %}"></i>
+                                        </button>
+                                        <button type="submit" name="manage" value="delete_announcement" class="btn btn-link p-0 text-danger" onclick="return confirm('Delete broadcast?')">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="text-center p-5 text-secondary">
+                            <i class="bi bi-megaphone h1 d-block mb-3 opacity-25"></i>
+                            <p>No active broadcasts in this sector.</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="tab-pane fade" id="assign-content">
+                        <div class="p-5 text-center text-secondary">
+                            <i class="bi bi-people h1"></i>
+                            <p>Cadet Management protocols pending.</p>
+                             
+                            {% for cadet_name, data_list in dictionary.items %}
+                                <h3 class="mt-4">Management: {{ cadet_name }}</h3>
+                                <table class="table table-dark table-hover mt-3 tiny">
+                                    <thead>
+                                        <tr>
+                                            {% for header in data_list.0 %}
+                                                <th>{{ header }}</th>
+                                            {% endfor %}
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for row in data_list|slice:"1:" %}
+                                            <tr>
+                                                {% for cell in row %}
+                                                    <td>
+                                                        {% if cell.year %}
+                                                            {{ cell|date:"Y-m-d H:i" }}
+                                                        {% else %}
+                                                            {{ cell }}
+                                                        {% endif %}
+                                                    </td>
+                                                {% endfor %}
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    function handleBroken(img) {
+        const url = img.src.toLowerCase();
+        const ext = url.split('.').pop().split(/\#|\?/)[0];
+        const container = img.parentElement;
+        
+        let iconClass = 'bi-file-earmark';
+        if (ext === 'pdf') iconClass = 'bi-file-earmark-pdf';
+        else if (['doc', 'docx'].includes(ext)) iconClass = 'bi-file-earmark-word';
+        else if (['zip', 'rar'].includes(ext)) iconClass = 'bi-file-earmark-zip';
+        
+        container.innerHTML = `<i class="bi ${iconClass} preview-icon"></i>`;
+    }
+</script>
+</body>
+</html>

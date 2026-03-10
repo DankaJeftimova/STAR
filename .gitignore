@@ -1,0 +1,16 @@
+# Security: Ignore environment variables
+.env
+
+# Python: Ignore compiled files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Django: Ignore the local database (if using SQLite)
+db.sqlite3
+*.mp4
+media/lectures/videos/
+
+# OS: Ignore system-specific files
+.DS_Store
+Thumbs.db

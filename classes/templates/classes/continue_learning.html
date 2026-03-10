@@ -1,0 +1,377 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Learning | {{ class_obj.name }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    
+    <style>
+        :root {
+            --deep-space: #0a0c12;
+            --panel-color: rgba(22, 27, 34, 0.8);
+            --accent-gold: #ffc857;
+            --star-white: #ffffff;
+            --nebula-blue: #3a506b;
+            --border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            background-color: var(--deep-space);
+            color: #e6edf3;
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            min-height: 100vh;
+            background-image: 
+                radial-gradient(1px 1px at 25px 35px, var(--star-white), rgba(0,0,0,0)),
+                radial-gradient(1.5px 1.5px at 60px 100px, #8b949e, rgba(0,0,0,0)),
+                radial-gradient(1px 1px at 110px 180px, var(--star-white), rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 150px 40px, #58a6ff, rgba(0,0,0,0));
+            background-size: 250px 250px;
+            animation: twinkle 8s infinite linear;
+        }
+
+        @keyframes twinkle {
+            0% { opacity: 0.9; }
+            50% { opacity: 1; }
+            100% { opacity: 0.9; }
+        }
+
+        /* Header Styling */
+        .learning-header {
+            background: linear-gradient(180deg, rgba(58, 80, 107, 0.2) 0%, var(--deep-space) 100%);
+            padding: 40px 0;
+            border-bottom: 1px solid var(--border-color);
+            backdrop-filter: blur(10px);
+        }
+
+        .welcome-header {
+            color: var(--accent-gold);
+            text-shadow: 0 0 20px rgba(255, 200, 87, 0.3);
+            font-weight: 700;
+        }
+
+        /* Glass Panel Styling */
+        .glass-card {
+            background: var(--panel-color);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            backdrop-filter: blur(15px);
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Navigation Pills */
+        .nav-pills .nav-link {
+            color: #8b949e;
+            border-radius: 12px;
+            transition: 0.3s;
+            border: 1px solid transparent;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .nav-pills .nav-link:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+        }
+
+        .nav-pills .nav-link.active {
+            background-color: var(--accent-gold);
+            color: var(--deep-space);
+            font-weight: 700;
+            box-shadow: 0 0 15px rgba(255, 200, 87, 0.3);
+        }
+
+        /* Lecture & Quiz Specifics */
+        .lecture-card {
+            border-left: 4px solid var(--nebula-blue);
+            transition: 0.3s ease;
+        }
+
+        .lecture-card:hover {
+            border-color: var(--accent-gold);
+            transform: translateX(5px);
+        }
+
+        .quiz-card {
+            border-left: 4px solid var(--accent-gold);
+        }
+
+        .btn-launch {
+            background-color: var(--accent-gold);
+            color: #0d1117;
+            font-weight: 700;
+            border: none;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-launch:hover {
+            background-color: #ffd685;
+            box-shadow: 0 5px 15px rgba(255, 200, 87, 0.2);
+        }
+
+        .status-pill {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            color: var(--accent-gold);
+            padding: 6px 16px;
+            border-radius: 50px;
+            font-size: 0.8rem;
+        }
+
+        .table-dark {
+            --bs-table-bg: transparent;
+            --bs-table-border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .tiny { font-size: 0.75rem; letter-spacing: 0.5px; }
+    </style>
+</head>
+<body>
+
+<header class="learning-header mb-5">
+    <div class="container d-flex justify-content-between align-items-center">
+        <div>
+            <a href="{% url 'classes:index' %}" class="btn btn-sm btn-outline-light border-0 opacity-75 mb-2">
+                <i class="bi bi-arrow-left"></i> Exit to Orbit
+            </a>
+            <h1 class="h2 welcome-header">Course: {{ class_obj.name }}</h1>
+        </div>
+        <div class="text-end">
+            <span class="status-pill">
+                <i class="bi bi-shield-check me-2"></i>Status: Active Cadet
+            </span>
+        </div>
+    </div>
+</header>
+
+<main class="container mb-5">
+    <div class="row g-4">
+        <div class="col-lg-3">
+            <div class="glass-card">
+                <ul class="nav flex-column nav-pills" id="v-pills-tab" role="tablist">
+                    <li class="nav-item">
+                        <button class="nav-link active w-100 text-start" data-bs-toggle="pill" data-bs-target="#lectures">
+                            <i class="bi bi-book me-2"></i> Lectures
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link w-100 text-start" data-bs-toggle="pill" data-bs-target="#quizzes">
+                            <i class="bi bi-patch-question me-2"></i> Evaluations
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link w-100 text-start" data-bs-toggle="pill" data-bs-target="#grades">
+                            <i class="bi bi-trophy me-2"></i> Performance
+                        </button>
+                    </li>
+                    <li class="nav-item mt-3 pt-3 border-top border-secondary">
+                        <button class="nav-link w-100 text-start text-danger" data-bs-toggle="pill" data-bs-target="#settings">
+                            <i class="bi bi-exclamation-triangle me-2"></i> Abandon Mission
+                        </button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="col-lg-9">
+            <div class="tab-content">
+                
+                <div class="tab-pane fade show active" id="lectures">
+                    {% if announcements %}
+                    <h3 class="h4 text-info mb-4"><i class="bi bi-megaphone me-2"></i>Fleet Broadcasts</h3>
+                    {% for announcement in announcements %}
+                        {% if announcement.is_live %}
+                        <div class="glass-card mb-4 p-3 border-start border-4 border-info" style="background: rgba(58, 80, 107, 0.1);">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h5 class="h6 text-info fw-bold mb-0 text-uppercase">{{ announcement.title }}</h5>
+                                <span class="tiny text-secondary">{{ announcement.created_at|date:"M d, H:i" }}</span>
+                            </div>
+                            <p class="small text-light mb-0" style="white-space: pre-wrap;">{{ announcement.body }}</p>
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                    <hr class="border-secondary my-5 opacity-25">
+                    {% endif %}
+
+                    <h3 class="h4 text-warning mb-4"><i class="bi bi-terminal me-2"></i>Briefing Room</h3>
+                    {% for lecture in lectures %}
+                    <div class="glass-card mb-3 lecture-card">
+                        <div class="row align-items-center">
+                            <div class="col-md-9">
+                                <h5 class="text-white mb-0">{{ lecture.title }}</h5>
+                                <div class="collapse" id="lectureFull{{ lecture.id }}">
+                                    <div class="mt-4 pt-3 border-top border-secondary">
+                                        <div class="text-light mb-4" style="white-space: pre-wrap; line-height: 1.6;">
+                                            {{ lecture.content }}
+                                        </div>
+                                        <div class="d-flex flex-wrap gap-2">
+                                            {% if lecture.video_file %}
+                                            <a href="{{ lecture.video_file.url }}" class="btn btn-launch btn-sm">
+                                                <i class="bi bi-play-fill"></i> Watch Video
+                                            </a>
+                                            {% endif %}
+                                            {% if lecture.file_1 %}<a href="{{ lecture.file_1.url }}" class="btn btn-outline-light btn-sm tiny"><i class="bi bi-download"></i> File 1</a>{% endif %}
+                                            {% if lecture.file_2 %}<a href="{{ lecture.file_2.url }}" class="btn btn-outline-light btn-sm tiny"><i class="bi bi-download"></i> File 2</a>{% endif %}
+                                            {% if lecture.file_3 %}<a href="{{ lecture.file_3.url }}" class="btn btn-outline-light btn-sm tiny"><i class="bi bi-download"></i> File 3</a>{% endif %}
+                                            {% if lecture.file_4 %}<a href="{{ lecture.file_4.url }}" class="btn btn-outline-light btn-sm tiny"><i class="bi bi-download"></i> File 4</a>{% endif %}
+                                            {% if lecture.file_5 %}<a href="{{ lecture.file_5.url }}" class="btn btn-outline-light btn-sm tiny"><i class="bi bi-download"></i> File 5</a>{% endif %}
+                                            {% if lecture.external_link %}
+                                            <a href="{{ lecture.external_link }}" target="_blank" class="btn btn-outline-info btn-sm tiny">
+                                                <i class="bi bi-link-45deg"></i> External Link
+                                            </a>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 text-end">
+                                <button class="btn btn-sm btn-outline-warning text-uppercase tiny fw-bold" 
+                                        type="button" 
+                                        data-bs-toggle="collapse" 
+                                        data-bs-target="#lectureFull{{ lecture.id }}" 
+                                        aria-expanded="false"
+                                        onclick="updateBtnText(this)">
+                                    View Full
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="text-center py-5 opacity-50">
+                        <i class="bi bi-cloud-slash display-1 mb-3"></i>
+                        <p>No briefing materials available yet.</p>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <div class="tab-pane fade" id="quizzes">
+                    <h3 class="h4 text-warning mb-4">Tactical Evaluations</h3>
+                    {% for quiz in class_obj.quizzes.all %}
+                        {% if quiz.is_published %}
+                            <div class="glass-card mb-3 quiz-card">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h5 class="text-white mb-1">{{ quiz.title }}</h5>
+                                        <div class="d-flex gap-3">
+                                            <span class="tiny text-warning text-uppercase fw-bold">
+                                                <i class="bi bi-list-task me-1"></i> {{ quiz.questions.count }} Questions
+                                            </span>
+                                            {% if quiz.due_date %}
+                                            <span class="tiny text-secondary">
+                                                <i class="bi bi-clock me-1"></i> Due: {{ quiz.due_date|date:"M d, Y" }}
+                                            </span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    {% if quiz.id in submitted_quiz_ids %}
+                                        <span class="status-pill border-success text-success">
+                                            <i class="bi bi-check-all me-1"></i> Mission Accomplished
+                                        </span>
+                                    {% else %}
+                                        <a href="{% url 'classes:take_quiz' quiz.pk %}" class="btn btn-launch px-4">Begin Quiz</a>
+                                    {% endif %}
+                                </div>
+                            </div>     
+                        {% endif %}
+                    {% empty %}
+                    <div class="text-center py-5 opacity-50">
+                        <i class="bi bi-shield-lock display-1 mb-3"></i>
+                        <p>No active evaluations found.</p>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <div class="tab-pane fade" id="grades">
+                    <h3 class="h4 text-info mb-4">Flight Logs & Performance</h3>
+                    <div class="glass-card">
+                        <div class="table-responsive">
+                            <table class="table table-dark align-middle">
+                                <thead>
+                                    <tr class="text-secondary small text-uppercase">
+                                        <th>Assigned Task</th>
+                                        <th>Date Submitted</th>
+                                        <th class="text-center">Score</th>
+                                        <th class="text-end">Result</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for submission in submissions %}
+                                    <tr>
+                                        <td>
+                                            <div class="fw-bold text-white">{{ submission.quiz.title }}</div>
+                                            <small class="text-secondary tiny uppercase">Evaluation</small>
+                                        </td>
+                                        <td class="text-light small">
+                                            {{ submission.date|date:"M d, Y" }}
+                                            <div class="tiny opacity-50">{{ submission.created_at|date:"H:i" }}</div>
+                                        </td>
+                                        <td class="text-center fw-bold text-warning">{{ submission.score }}</td>
+                                        <td class="text-end">
+                                            {% if submission.quiz.due_date %}
+                                                {% if submission.date <= submission.quiz.due_date %}
+                                                    <span class="badge rounded-pill border border-success text-success px-3 tiny">ON TIME</span>
+                                                {% else %}
+                                                    <span class="badge rounded-pill border border-danger text-danger px-3 tiny">LATE</span>
+                                                {% endif %}
+                                            {% else %}
+                                                <span class="badge rounded-pill border border-secondary text-secondary px-3 tiny">COMPLETED</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="4" class="text-center py-5 opacity-25">
+                                            <i class="bi bi-bar-chart-line display-4 mb-2 d-block"></i>
+                                            No mission data recorded.
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-pane fade" id="settings">
+                    <h3 class="h4 text-danger mb-4">Security Protocol</h3>
+                    <div class="glass-card border-danger" style="background: rgba(220, 53, 69, 0.05);">
+                        <div class="row align-items-center">
+                            <div class="col-md-8">
+                                <h5 class="text-white">Unenroll from Course</h5>
+                                <p class="text-secondary small mb-0">Warning: Abandoning the mission will revoke access and wipe local progress logs.</p>
+                            </div>
+                            <div class="col-md-4 text-end">
+                                <form method="POST" action="" onsubmit="return confirm('Confirm mission abandonment?');">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="unenroll">
+                                    <button type="submit" class="btn btn-outline-danger btn-sm fw-bold">Abandon Mission</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer class="text-center py-5 text-secondary small opacity-50">
+    <p>Danka Jeftimova System for Teaching Assignments and Resources &copy; 2026</p>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    function updateBtnText(btn) {
+        setTimeout(() => {
+            const isExpanded = btn.getAttribute('aria-expanded') === 'true';
+            btn.innerHTML = isExpanded ? 'Close Briefing' : 'View Full';
+        }, 100);
+    }
+</script>
+</body>
+</html>

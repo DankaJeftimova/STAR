@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile Settings | STAR LMS</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --deep-space: #0a0c12;
+            --panel-color: rgba(22, 27, 34, 0.8);
+            --accent-gold: #ffc857;
+            --star-white: #ffffff;
+            --nebula-blue: #3a506b;
+            --border-color: rgba(255, 255, 255, 0.1);
+            --void-gray: #161b22;
+        }
+
+        body {
+            background-color: var(--deep-space);
+            color: #e6edf3;
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            display: flex;
+            min-height: 100vh;
+            /* Star Background Theme */
+            background-image: 
+                radial-gradient(1px 1px at 25px 35px, var(--star-white), rgba(0,0,0,0)),
+                radial-gradient(1.5px 1.5px at 60px 100px, #8b949e, rgba(0,0,0,0)),
+                radial-gradient(1px 1px at 110px 180px, var(--star-white), rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 150px 40px, #58a6ff, rgba(0,0,0,0)),
+                radial-gradient(1px 1px at 190px 90px, var(--star-white), rgba(0,0,0,0));
+            background-size: 250px 250px;
+            animation: twinkle 8s infinite linear;
+        }
+
+        @keyframes twinkle {
+            0% { opacity: 0.9; }
+            50% { opacity: 1; }
+            100% { opacity: 0.9; }
+        }
+
+        /* Side Navigation */
+        .sidebar {
+            width: 260px;
+            background: var(--panel-color);
+            backdrop-filter: blur(15px);
+            border-right: 1px solid var(--border-color);
+            padding: 2.5rem 1.2rem;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar h2 {
+            font-size: 1.5rem;
+            letter-spacing: 2px;
+            font-weight: 800;
+            margin-bottom: 2.5rem;
+            text-shadow: 0 0 15px rgba(255, 200, 87, 0.3);
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            color: #8b949e;
+            text-decoration: none;
+            border-radius: 12px;
+            margin-bottom: 0.8rem;
+            transition: 0.3s all ease;
+            font-weight: 500;
+        }
+
+        .nav-link.active, .nav-link:hover {
+            background: rgba(255, 200, 87, 0.1);
+            color: var(--accent-gold);
+            box-shadow: inset 0 0 10px rgba(255, 200, 87, 0.05);
+        }
+
+        .nav-link i {
+            width: 25px;
+            font-size: 1.1rem;
+        }
+
+        /* Main Content */
+        .main-container {
+            flex-grow: 1;
+            padding: 3rem;
+            max-width: 1000px;
+            margin: 0 auto;
+            overflow-y: auto;
+        }
+
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 2.5rem;
+            margin-bottom: 3.5rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 2.5rem;
+        }
+
+        .avatar-container {
+            position: relative;
+            width: 130px;
+            height: 130px;
+            border-radius: 50%;
+            border: 2px solid var(--accent-gold);
+            box-shadow: 0 0 25px rgba(255, 200, 87, 0.2);
+            overflow: hidden;
+            background: var(--void-gray);
+        }
+
+        .avatar-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Settings Cards */
+        .settings-card {
+            background: var(--panel-color);
+            border-radius: 20px;
+            padding: 2.2rem;
+            border: 1px solid var(--border-color);
+            margin-bottom: 2rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .settings-card h3 {
+            margin-top: 0;
+            color: var(--accent-gold);
+            font-size: 1.2rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 1.8rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .form-group {
+            margin-bottom: 1.8rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.7rem;
+            font-size: 0.85rem;
+            color: #8b949e;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        input[type="text"], input[type="email"], textarea {
+            width: 100%;
+            padding: 0.9rem;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            color: white;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        input:focus, textarea:focus {
+            border-color: var(--accent-gold);
+            background: rgba(255, 255, 255, 0.05);
+            box-shadow: 0 0 12px rgba(255, 200, 87, 0.1);
+        }
+
+        input:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-save {
+            background: var(--accent-gold);
+            color: var(--deep-space);
+            border: none;
+            padding: 1rem 2.5rem;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: 0.3s all ease;
+            display: block;
+            margin-top: 2rem;
+        }
+
+        .btn-save:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(255, 200, 87, 0.2);
+            background: #ffd685;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.2rem;
+        }
+
+        .stat-box {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 1.5rem;
+            border-radius: 15px;
+            text-align: center;
+            border: 1px solid var(--border-color);
+            transition: 0.3s;
+        }
+
+        .stat-box:hover {
+            border-color: var(--nebula-blue);
+            background: rgba(58, 80, 107, 0.1);
+        }
+
+        .stat-value {
+            display: block;
+            font-size: 1.8rem;
+            color: var(--accent-gold);
+            font-weight: 800;
+            margin-bottom: 0.3rem;
+        }
+
+        .stat-box label {
+            margin-bottom: 0;
+            font-size: 0.75rem;
+        }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--deep-space); }
+        ::-webkit-scrollbar-thumb { background: var(--void-gray); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--nebula-blue); }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <h2 style="color: var(--accent-gold); text-align: center;">STAR LMS</h2>
+        <nav>
+            
+            <a href="#" class="nav-link active"><i class="fas fa-user-astronaut"></i>&nbsp; Profile</a>
+           
+            <a href="#" class="nav-link" style="margin-top: auto; color: #ff6b6b;"><i class="fas fa-sign-out-alt"></i>&nbsp; Logout</a>
+        </nav>
+    </div>
+
+    <div class="main-container">
+        <div class="profile-header">
+           
+            <div>
+                <h1 style="margin: 0; font-weight: 800; color: var(--accent-gold);">{{ user.first_name|default:"Cadet" }} {{ user.last_name }}</h1>
+                <p style="color: #8b949e; margin-top: 5px;">Rank: Master Programmer | <span style="color: var(--nebula-blue);">Stationed since 2026</span></p>
+            </div>
+        </div>
+
+        <form method="POST">
+            {% csrf_token %}
+            
+            <div class="settings-card">
+                <h3><i class="fas fa-id-card"></i> Cadet Information</h3>
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" value="{{ user.username }}" disabled>
+                    <small style="color: #586069; margin-top: 8px; display: block;">Username is fixed to your current subspace frequency.</small>
+                </div>
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" name="email" value="{{ user.email }}">
+                </div>
+                <div class="form-group">
+                    <label>Bio / Mission Statement</label>
+                    <textarea name="bio" rows="4" placeholder="Tell the galaxy about yourself...">{{ user.profile.bio }}</textarea>
+                </div>
+            </div>
+
+            <div class="settings-card">
+                <h3><i class="fas fa-chart-line"></i> Academic Coordinates</h3>
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <span class="stat-value">12</span>
+                        <label>Classes Joined</label>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-value">85%</span>
+                        <label>Avg. Quiz Score</label>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-value">4</span>
+                        <label>Certificates</label>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-save">Update Star Chart</button>
+        </form>
+    </div>
+
+</body>
+</html>

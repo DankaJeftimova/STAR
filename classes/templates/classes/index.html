@@ -1,0 +1,279 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Star Academy | Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    
+    <style>
+        :root {
+            --deep-space: #0a0c12;
+            --panel-color: rgba(22, 27, 34, 0.8);
+            --accent-gold: #ffc857;
+            --star-white: #ffffff;
+            --nebula-blue: #3a506b;
+            --border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            background-color: var(--deep-space);
+            color: #e6edf3;
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            min-height: 100vh;
+            background-image: 
+                radial-gradient(1px 1px at 25px 35px, var(--star-white), rgba(0,0,0,0)),
+                radial-gradient(1.5px 1.5px at 60px 100px, #8b949e, rgba(0,0,0,0)),
+                radial-gradient(1px 1px at 110px 180px, var(--star-white), rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 150px 40px, #58a6ff, rgba(0,0,0,0)),
+                radial-gradient(1px 1px at 190px 90px, var(--star-white), rgba(0,0,0,0));
+            background-size: 250px 250px;
+            animation: twinkle 8s infinite linear;
+            padding-bottom: 50px;
+        }
+
+        @keyframes twinkle {
+            0% { opacity: 0.9; }
+            50% { opacity: 1; }
+            100% { opacity: 0.9; }
+        }
+
+        /* Search Hero Section */
+        .search-hero {
+            background: linear-gradient(180deg, rgba(255,200,87,0.05) 0%, var(--deep-space) 100%);
+            padding: 60px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .welcome-header {
+            color: var(--accent-gold);
+            text-shadow: 0 0 20px rgba(255, 200, 87, 0.3);
+            font-weight: 700;
+        }
+
+        /* Form Controls */
+        .form-control {
+            background-color: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            color: white;
+            backdrop-filter: blur(5px);
+        }
+
+        .form-control:focus {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-color: var(--accent-gold);
+            color: white;
+            box-shadow: 0 0 10px rgba(255, 200, 87, 0.2);
+        }
+
+        /* Navigation Buttons */
+        .btn-star-outline {
+            border: 2px solid var(--nebula-blue);
+            color: #fff;
+            transition: all 0.3s ease;
+            margin: 5px;
+            font-weight: 600;
+            border-radius: 12px;
+        }
+
+        .btn-star-outline:hover, .btn-star-outline.active {
+            background: rgba(58, 80, 107, 0.3);
+            border-color: var(--accent-gold);
+            color: var(--accent-gold);
+        }
+
+        .btn-launch {
+            background-color: var(--accent-gold);
+            color: #0d1117;
+            font-weight: 700;
+            border: none;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+        }
+
+        .btn-launch:hover {
+            background-color: #ffd685;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(255, 200, 87, 0.2);
+            color: #000;
+        }
+
+        /* Cards */
+        .class-card {
+            background: var(--panel-color);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            backdrop-filter: blur(15px);
+            transition: transform 0.3s ease, border-color 0.3s ease;
+        }
+
+        .class-card:hover {
+            transform: translateY(-8px);
+            border-color: var(--accent-gold);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.5);
+        }
+
+        .section-title {
+            border-left: 5px solid var(--accent-gold);
+            padding-left: 15px;
+            margin: 40px 0 25px 0;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .status-pill {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            color: #8b949e;
+            padding: 6px 16px;
+            border-radius: 50px;
+            font-size: 0.8rem;
+        }
+
+        /* Dropdown Customization */
+        .dropdown-menu-dark {
+            background-color: #161b22;
+            border: 1px solid var(--border-color);
+        }
+
+        .user-profile-box {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color) !important;
+            backdrop-filter: blur(10px);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="dropdown" style="position: absolute; top: 20px; right: 20px; z-index: 1000;">
+        <button class="user-profile-box dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="padding: 8px 15px; border-radius: 30px; color: white;">
+            <span class="me-2">{{ request.user.username }}</span>
+            <i class="bi bi-gear-fill text-warning"></i>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end shadow">
+            <li><h6 class="dropdown-header text-secondary">Settings</h6></li>
+            <li>
+                <form action="{% url 'classes:profile_settings' request.user.pk %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="dropdown-item">Profile Settings</button>
+                </form>
+            </li>
+            <li><hr class="dropdown-divider border-secondary"></li>
+            <li>
+                <form action="{% url 'classes:log_out' %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="dropdown-item text-danger">Log Out</button>
+                </form>
+            </li>
+        </ul>
+    </div>
+
+    <header class="search-hero text-center">
+        <div class="container">
+            <div class="status-pill d-inline-block mb-3">
+                <i class="bi bi-broadcast text-success me-2"></i> System Uplink Active
+            </div>
+            <h1 class="display-5 welcome-header mb-4">Galactic Dashboard</h1>
+            <form method="post" action="{% url 'classes:index' %}" class="row g-2 justify-content-center">
+                {% csrf_token %}
+                <div class="col-md-5">
+                    {{ form.title }}
+                </div>
+                <div class="col-auto">
+                    <button type="submit" class="btn btn-launch px-4">Search Stars</button>
+                </div>
+            </form>
+        </div>
+    </header>
+
+    <main class="container mt-5">
+        <div class="d-flex flex-wrap justify-content-center mb-5">
+            <button onclick="all_classes()" class="btn btn-star-outline nav-btn">Find Classes</button>
+            <button onclick="enrolled()" class="btn btn-star-outline nav-btn">Enrolled in</button>
+            <button onclick="offered()" class="btn btn-star-outline nav-btn active">Offered</button>
+            <a href="{% url 'classes:create_class' %}" class="btn btn-launch fw-bold ms-md-4">＋ Create Class</a>
+        </div>
+
+        <div id="manage"></div>
+    </main>
+
+    <div style="display: none;"> 
+        <div id="all">
+            <h3 class="section-title">Explore New Classes</h3>
+            <div class="row row-cols-1 row-cols-md-3 g-4">
+                {% for one in other_user_classes %}
+                    <div class="col">
+                        <div class="class-card h-100 p-4">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h4 class="text-warning mb-0">{{ one.name }}</h4>
+                                <small class="text-secondary">{{one.author.username}}</small>
+                                <span class="badge status-pill">New</span>
+                            </div>
+                            <p class="text-secondary small">Explore the mysteries of {{ one.name }} in this academy session.</p>
+                            <div class="mt-auto">
+                                {% if request.user in one.students.all %}
+                                    <button class="btn btn-sm btn-outline-secondary w-100" disabled>Already Enrolled</button>
+                                {% else %}
+                                    <a href ="{% url 'classes:enroll' one.pk %}" class="btn btn-sm btn-star-outline w-100">Enroll Now</a>
+                                {% endif %} 
+                            </div>
+                        </div>
+                    </div> 
+                {% empty %}
+                    <div class="col-12 text-center text-secondary">No classes available to join.</div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div id="offered" class="content-section">
+            <h3 class="section-title">Classes You Offer</h3>
+            <div class="row row-cols-1 row-cols-md-3 g-4">
+                {% for one in user_classes %}
+                    <div class="col">
+                        <div class="class-card h-100 p-4" style="border-color: var(--accent-gold);">
+                            <h4 class="text-warning">{{ one.name }}</h4>
+                            <p class="text-secondary small">You are the instructor for this star system.</p>
+                            <hr class="border-secondary">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="small text-warning"><i class="bi bi-people"></i> {{one.students.count}} Students</span>
+                                <a href="{% url 'classes:manage_class' one.pk %}" class="btn btn-launch btn-sm">Manage</a>
+                            </div>
+                        </div>
+                    </div>
+                {% empty %}
+                    <div class="col-12 text-center text-secondary">You aren't teaching any classes yet.</div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div id="enrolled" class="content-section">
+            <h3 class="section-title">Classes You Are Enrolled In</h3>
+            <div class="row row-cols-1 row-cols-md-3 g-4">
+                {% for one in enrolled_classes %}
+                    <div class="col">
+                        <div class="class-card h-100 p-4">
+                            <h4 class="text-info">{{ one.name }}</h4>
+                            <div class="progress mb-3" style="height: 5px; background: rgba(255,255,255,0.1);">
+                                <div class="progress-bar bg-warning" style="width: 25%"></div>
+                            </div>
+                            <a class="btn btn-launch w-100" href="{% url 'classes:continue_learning' one.pk %}" >Continue Learning</a>
+                        </div>
+                    </div>
+                {% empty %}
+                    <div class="col-12 text-center text-secondary">You haven't enrolled in any classes.</div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <footer class="text-center py-5 text-secondary small opacity-50">
+        <p>Danka Jeftimova System for Teaching Assignments and Resources &copy; 2026</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{% static 'classes/index.js' %}"></script>
+</body>
+</html>

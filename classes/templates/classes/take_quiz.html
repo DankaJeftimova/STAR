@@ -1,0 +1,227 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mission Evaluation | {{ quiz.title }}</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --deep-space: #0a0c12;
+            --panel-color: rgba(22, 27, 34, 0.8);
+            --accent-gold: #ffc857;
+            --star-white: #ffffff;
+            --star-blue: #0dcaf0;
+            --border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        body { 
+            background-color: var(--deep-space); 
+            color: #f0f0f0; 
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            min-height: 100vh;
+            /* Star Background Theme */
+            background-image: 
+                radial-gradient(1px 1px at 25px 35px, var(--star-white), rgba(0,0,0,0)),
+                radial-gradient(1.5px 1.5px at 60px 100px, #8b949e, rgba(0,0,0,0)),
+                radial-gradient(1px 1px at 110px 180px, var(--star-white), rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 150px 40px, #58a6ff, rgba(0,0,0,0)),
+                radial-gradient(1px 1px at 190px 90px, var(--star-white), rgba(0,0,0,0));
+            background-size: 250px 250px;
+            animation: twinkle 8s infinite linear;
+        }
+
+        @keyframes twinkle {
+            0% { opacity: 0.9; }
+            50% { opacity: 1; }
+            100% { opacity: 0.9; }
+        }
+        
+        .quiz-header { 
+            background: linear-gradient(180deg, rgba(255, 200, 87, 0.08) 0%, var(--deep-space) 100%); 
+            padding: 60px 0; 
+            border-bottom: 1px solid var(--border-color); 
+        }
+
+        .welcome-header {
+            color: var(--accent-gold);
+            text-shadow: 0 0 20px rgba(255, 200, 87, 0.3);
+            font-weight: 700;
+        }
+
+        .glass-card { 
+            background-color: var(--panel-color); 
+            border: 1px solid var(--border-color); 
+            border-radius: 20px; 
+            padding: 35px; 
+            backdrop-filter: blur(15px);
+            transition: 0.3s;
+        }
+
+        /* Option Containers */
+        .option-container {
+            display: block;
+            position: relative;
+            padding: 18px 18px 18px 55px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            font-size: 1rem;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            transition: 0.2s all ease;
+            color: #8b949e;
+        }
+
+        .option-container:hover {
+            background: rgba(13, 202, 240, 0.05);
+            border-color: var(--star-blue);
+            transform: translateX(5px);
+        }
+
+        .option-container input {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .checkmark {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            height: 22px;
+            width: 22px;
+            background-color: transparent;
+            border: 2px solid #484f58;
+            border-radius: 50%;
+            transition: 0.3s;
+        }
+
+        .option-container:hover input ~ .checkmark {
+            border-color: var(--star-blue);
+        }
+
+        .option-container input:checked ~ .checkmark {
+            background-color: var(--star-blue);
+            border-color: var(--star-blue);
+            box-shadow: 0 0 10px rgba(13, 202, 240, 0.5);
+        }
+
+        .option-container input:checked ~ .option-text {
+            color: white;
+            font-weight: 600;
+        }
+
+        /* Buttons */
+        .btn-launch {
+            background-color: var(--accent-gold);
+            color: #0d1117;
+            font-weight: 800;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-launch:hover {
+            background-color: #ffd685;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(255, 200, 87, 0.2);
+            color: #000;
+        }
+
+        .submit-section {
+            border-top: 1px solid var(--border-color);
+            padding-top: 40px;
+        }
+
+        .badge-status {
+            background: rgba(13, 202, 240, 0.1);
+            color: var(--star-blue);
+            border: 1px solid rgba(13, 202, 240, 0.3);
+            padding: 5px 12px;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+    </style>
+</head>
+<body>
+
+<header class="quiz-header mb-5 text-center">
+    <div class="container">
+        <div class="badge-status d-inline-block mb-3">
+            <i class="bi bi-shield-shaded me-2"></i> Secure Tactical Link
+        </div>
+        <h1 class="display-5 welcome-header mb-2">{{ quiz.title }}</h1>
+        <p class="text-secondary">System: {{ quiz.course.name }} | Data Points: {{ questions.count }}</p>
+    </div>
+</header>
+
+<main class="container mb-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <form method="POST" action="{% url 'classes:submit_quiz' quiz.id %}">
+                {% csrf_token %}
+
+                {% for question in questions %}
+                <div class="glass-card mb-4 shadow-sm">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <span class="badge-status">Sequence {{ forloop.counter }}</span>
+                        <small class="text-secondary"><i class="bi bi-cpu me-1"></i> Processing...</small>
+                    </div>
+                    
+                    <h4 class="text-white mb-4 fw-bold">{{ question.prompt }}</h4>
+
+                    <div class="options-group">
+                        <label class="option-container">
+                            <input type="radio" name="question_{{ question.id }}" value="A" required>
+                            <span class="checkmark"></span>
+                            <span class="option-text">{{ question.option_a }}</span>
+                        </label>
+
+                        <label class="option-container">
+                            <input type="radio" name="question_{{ question.id }}" value="B">
+                            <span class="checkmark"></span>
+                            <span class="option-text">{{ question.option_b }}</span>
+                        </label>
+
+                        <label class="option-container">
+                            <input type="radio" name="question_{{ question.id }}" value="C">
+                            <span class="checkmark"></span>
+                            <span class="option-text">{{ question.option_c }}</span>
+                        </label>
+
+                        <label class="option-container">
+                            <input type="radio" name="question_{{ question.id }}" value="D">
+                            <span class="checkmark"></span>
+                            <span class="option-text">{{ question.option_d }}</span>
+                        </label>
+                    </div>
+                </div>
+                {% endfor %}
+
+                <div class="submit-section text-center mb-5">
+                    <p class="text-secondary small mb-4">Verify all coordinates before transmission. Signal lock is final.</p>
+                    <button type="submit" class="btn btn-launch px-5" onclick="return confirm('Confirm final transmission?');">
+                        <i class="bi bi-send-check me-2"></i> Submit Flight Log
+                    </button>
+                    <div class="mt-4">
+                        <a href="{% url 'classes:continue_learning' quiz.course.id %}" class="text-secondary text-decoration-none small opacity-75 hover-opacity-100">
+                            <i class="bi bi-x-circle me-1"></i> Abort Assessment
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
