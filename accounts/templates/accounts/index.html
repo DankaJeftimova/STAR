@@ -10,7 +10,6 @@
     
     <style>
         :root {
-            /* Deeper, darker space tones */
             --deep-space: #0a0c12;
             --panel-color: rgba(22, 27, 34, 0.8);
             --accent-gold: #ffc857;
@@ -25,7 +24,7 @@
             font-family: 'Segoe UI', Roboto, sans-serif;
             color: #e6edf3;
             min-height: 100vh;
-            /* Creating the Starfield */
+           
             background-image: 
                 radial-gradient(1px 1px at 25px 35px, var(--star-white), rgba(0,0,0,0)),
                 radial-gradient(1.5px 1.5px at 60px 100px, #8b949e, rgba(0,0,0,0)),
@@ -36,14 +35,14 @@
             animation: twinkle 8s infinite linear;
         }
 
-        /* Subtle twinkle animation */
+       
         @keyframes twinkle {
             0% { opacity: 0.9; }
             50% { opacity: 1; }
             100% { opacity: 0.9; }
         }
 
-        /* Navbar Styling */
+       
         .navbar-star {
             background: rgba(10, 12, 18, 0.9);
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
@@ -57,7 +56,6 @@
             text-transform: uppercase;
         }
 
-        /* Main Dashboard Card */
         .command-card {
             background: var(--panel-color);
             border: 1px solid rgba(255, 255, 255, 0.1);
@@ -68,14 +66,14 @@
             margin-top: 40px;
         }
 
-        /* Glowing Welcome Text */
+        
         .welcome-header {
             color: var(--accent-gold);
             text-shadow: 0 0 20px rgba(255, 200, 87, 0.3);
             font-weight: 700;
         }
 
-        /* Main Buttons */
+       
         .btn-launch {
             background-color: var(--accent-gold);
             color: #0d1117;
@@ -109,7 +107,7 @@
             border-color: #fff;
         }
 
-        /* Logout Style */
+        
         .btn-logout {
             color: #ff7b72;
             font-weight: 600;
