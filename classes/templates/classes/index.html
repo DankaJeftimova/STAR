@@ -40,7 +40,6 @@
             100% { opacity: 0.9; }
         }
 
-     
         .search-hero {
             background: linear-gradient(180deg, rgba(255,200,87,0.05) 0%, var(--deep-space) 100%);
             padding: 60px 0;
@@ -67,7 +66,6 @@
             box-shadow: 0 0 10px rgba(255, 200, 87, 0.2);
         }
 
-        
         .btn-star-outline {
             border: 2px solid var(--nebula-blue);
             color: #fff;
@@ -99,7 +97,6 @@
             color: #000;
         }
 
-     
         .class-card {
             background: var(--panel-color);
             border: 1px solid var(--border-color);
@@ -132,6 +129,29 @@
             font-size: 0.8rem;
         }
 
+        .author-tag {
+            cursor: help;
+            border-bottom: 1px dashed var(--nebula-blue);
+            transition: color 0.2s;
+        }
+
+        .author-tag:hover {
+            color: var(--accent-gold) !important;
+        }
+
+        .popover {
+            background-color: #161b22;
+            border: 1px solid var(--accent-gold);
+        }
+        .popover-header {
+            background-color: #0d1117;
+            color: var(--accent-gold);
+            border-bottom: 1px solid var(--border-color);
+        }
+        .popover-body {
+            color: #e6edf3;
+        }
+
         .dropdown-menu-dark {
             background-color: #161b22;
             border: 1px solid var(--border-color);
@@ -145,7 +165,9 @@
     </style>
 </head>
 <body>
-
+    <br>
+ <a href="{% url 'accounts:index' %}" class="btn btn-launch  ms-md-4">Home</a>
+    
     <div class="dropdown" style="position: absolute; top: 20px; right: 20px; z-index: 1000;">
         <button class="user-profile-box dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="padding: 8px 15px; border-radius: 30px; color: white;">
             <span class="me-2">{{ request.user.username }}</span>
@@ -154,7 +176,7 @@
         <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end shadow">
             <li><h6 class="dropdown-header text-secondary">Settings</h6></li>
             <li>
-                <form action="{% url 'classes:profile_settings' request.user.pk %}" method="post">
+                <form action="{% url 'accounts:profile_settings' request.user.pk %}" method="post">
                     {% csrf_token %}
                     <button type="submit" class="dropdown-item">Profile Settings</button>
                 </form>
@@ -207,15 +229,26 @@
                         <div class="class-card h-100 p-4">
                             <div class="d-flex justify-content-between align-items-start mb-2">
                                 <h4 class="text-warning mb-0">{{ one.name }}</h4>
-                                <small class="text-secondary">{{one.author.username}}</small>
                                 <span class="badge status-pill">New</span>
                             </div>
+                            
+                            <div class="mb-3">
+                                <span class="text-secondary small author-tag" 
+                                      data-bs-toggle="popover" 
+                                      data-bs-trigger="hover focus" 
+                                      title="Instructor Profile" 
+                                      data-bs-content="Username: {{ one.author.username }} | Joined: {{ one.author.date_joined|date:'M Y' }}">
+                                    <i class="bi bi-person-badge me-1"></i>{{ one.author.username }}
+                                </span>
+                            </div>
+
                             <p class="text-secondary small">Explore the mysteries of {{ one.name }} in this academy session.</p>
+                            <p>{{one.description}}</p>
                             <div class="mt-auto">
                                 {% if request.user in one.students.all %}
                                     <button class="btn btn-sm btn-outline-secondary w-100" disabled>Already Enrolled</button>
                                 {% else %}
-                                    <a href ="{% url 'classes:enroll' one.pk %}" class="btn btn-sm btn-star-outline w-100">Enroll Now</a>
+                                    <a href="{% url 'classes:enroll' one.pk %}" class="btn btn-sm btn-star-outline w-100">Enroll Now</a>
                                 {% endif %} 
                             </div>
                         </div>
@@ -273,5 +306,22 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="{% static 'classes/index.js' %}"></script>
+    
+ <script>
+    document.addEventListener('mouseover', function (e) {
+        // Look for the author-tag specifically
+        const target = e.target.closest('.author-tag');
+        
+        if (target && !bootstrap.Popover.getInstance(target)) {
+            // Initialize it on the fly the first time the mouse touches it
+            new bootstrap.Popover(target, {
+                container: 'body',
+                trigger: 'hover',
+                placement: 'top',
+                html: true
+            }).show();
+        }
+    });
+</script>
 </body>
 </html>

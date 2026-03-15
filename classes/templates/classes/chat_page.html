@@ -1,0 +1,147 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Star Academy | Intelligence Core</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+        :root {
+            --deep-space: #06080a;
+            --panel-color: #0d1117;
+            --accent-gold: #ffc857;
+            --nebula-blue: #58a6ff;
+            --border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        body, html {
+            margin: 0; padding: 0; height: 100%;
+            background-color: var(--deep-space);
+            color: #f0f6fc; font-family: 'Inter', sans-serif;
+            overflow: hidden;
+        }
+
+        .star-background {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: radial-gradient(1px 1px at 20px 30px, #fff, rgba(0,0,0,0)), radial-gradient(2px 2px at 150px 40px, var(--nebula-blue), rgba(0,0,0,0));
+            background-size: 800px 800px; animation: spaceDrift 100s linear infinite; z-index: -1;
+        }
+
+        @keyframes spaceDrift { from { background-position: 0 0; } to { background-position: 800px 800px; } }
+
+        .top-nav {
+            height: 70px; background: rgba(13, 17, 23, 0.9); border-bottom: 1px solid var(--border-color);
+            display: flex; align-items: center; justify-content: space-between; padding: 0 40px; backdrop-filter: blur(10px);
+        }
+
+        .main-container { max-width: 1100px; margin: 40px auto; height: calc(100vh - 180px); display: flex; flex-direction: column; }
+
+        .output-display {
+            flex-grow: 1; background: rgba(13, 17, 23, 0.7); border: 1px solid var(--border-color);
+            border-bottom: none; border-radius: 12px 12px 0 0; padding: 40px; overflow-y: auto;
+        }
+
+        .input-area { background: var(--panel-color); border: 1px solid var(--border-color); border-radius: 0 0 12px 12px; padding: 25px; position: relative; }
+        .input-area::before { content: ''; position: absolute; top: -1px; left: 0; width: 100%; height: 2px; background: var(--accent-gold); }
+
+        textarea.command-field {
+            background: rgba(0,0,0,0.4); border: 1px solid var(--border-color); color: white;
+            padding: 15px 20px; width: 100%; height: 60px; border-radius: 8px; resize: none; font-family: monospace;
+        }
+
+        .btn-transmit { background: var(--accent-gold); color: black; border: none; padding: 0 30px; border-radius: 8px; font-weight: 800; text-transform: uppercase; height: 60px; }
+
+       
+        .intelligence-text { font-size: 1rem; line-height: 1.6; color: #d1d7e0; }
+        .intelligence-text h2 { color: var(--accent-gold); font-size: 1.25rem; margin-top: 20px; }
+        .intelligence-text strong { color: var(--accent-gold); }
+        .intelligence-text p { margin-bottom: 1rem; }
+        
+        .status-pill { background: rgba(88, 166, 255, 0.1); color: var(--nebula-blue); padding: 4px 12px; border-radius: 20px; font-size: 0.7rem; font-family: monospace; border: 1px solid rgba(88, 166, 255, 0.3); }
+    </style>
+</head>
+<body>
+    <br>
+ <a href="{% url 'accounts:index' %}" class="btn text-warning">Home</a>
+    <div class="star-background"></div>
+
+    <header class="top-nav">
+        <span style="color:var(--accent-gold); font-weight:900; letter-spacing:2px;">STAR ACADEMY</span>
+        <div class="d-flex gap-3">
+            <span class="status-pill">CORE: 2.5-FLASH</span>
+            <span class="status-pill">SECURE UPLINK</span>
+        </div>
+    </header>
+
+    <main class="main-container">
+        <section class="output-display" id="scroll-target">
+            {% if answer %}
+                <div class="mb-2"><span style="color:var(--nebula-blue); font-family:monospace; font-size:0.6rem; opacity:0.5;">Incoming Intelligence Segment</span></div>
+                
+                <div class="intelligence-text" id="response-content">{{ answer }}</div>
+                
+            {% else %}
+                <div class="h-100 d-flex flex-column align-items-center justify-content-center text-center opacity-25">
+                    <i class="bi bi-rocket-takeoff mb-4" style="font-size: 4rem; color: var(--accent-gold);"></i>
+                    <h2 style="letter-spacing: 4px;">AWAITING COMMAND</h2>
+                </div>
+            {% endif %}
+        </section>
+
+        <section class="input-area">
+            <form method="POST" class="d-flex gap-3">
+                {% csrf_token %}
+                <textarea name="prompt" class="command-field" placeholder="Input directive..." required></textarea>
+                <button type="submit" class="btn-transmit">Transmit</button>
+            </form>
+        </section>
+    </main>
+
+    <script>
+    // Configuration for MathJax to handle the dollar signs properly
+    window.MathJax = {
+        tex: {
+            inlineMath: [['$', '$']],
+            displayMath: [['$$', '$$']],
+            processEscapes: true
+        },
+        options: {
+            ignoreHtmlClass: 'nosync',
+            processHtmlClass: 'intelligence-text'
+        }
+    };
+
+    window.onload = function() {
+        const content = document.getElementById('response-content');
+        if (content) {
+            // 1. Capture the raw text before anything else touches it
+            let rawText = content.textContent || content.innerText;
+
+            // 2. Convert Markdown to HTML (Bold, Lists, etc.)
+            // We use 'marked.parse' but we must ensure it doesn't break the LaTeX
+            content.innerHTML = marked.parse(rawText);
+
+            // 3. Force MathJax to scan the new HTML and render the formulas
+            if (window.MathJax && window.MathJax.typesetPromise) {
+                MathJax.typesetPromise([content]).then(() => {
+                    console.log("Transmission Cleaned: Math Rendered.");
+                }).catch((err) => console.error("Telemetric Error:", err));
+            }
+
+            // 4. Auto-scroll to the bottom of the console
+            const scroller = document.getElementById('scroll-target');
+            if (scroller) {
+                scroller.scrollTop = scroller.scrollHeight;
+            }
+        }
+    };
+</script>
+</body>
+</html>

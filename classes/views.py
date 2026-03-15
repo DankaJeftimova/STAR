@@ -6,6 +6,7 @@ from django import forms
 from .models import ClassModel, Question, Quiz, Lecture, SubmitQuiz, Announcement
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
+from .services import call_gemini
 
 
 
@@ -35,7 +36,11 @@ def index(request):
         if form.is_valid():
             title = form.cleaned_data['title']
     
-            found = ClassModel.objects.filter(name__icontains=title)
+            found = ClassModel.objects.filter(name__icontains=title).exclude(
+        author=request.user
+    ).exclude(
+        students=request.user
+    )
 
             return render(request, "classes/search_result.html", {
                 "user_classes": found,
@@ -391,9 +396,6 @@ def log_out(request):
 
 
 
-@login_required
-def profile_settings(request, pk):
-    return render(request, 'classes/profile_settings.html')
 
 
 
@@ -408,3 +410,21 @@ def dismiss(request, class_pk, user_pk):
         
     
     return redirect('classes:manage_class', pk=class_pk)
+
+
+
+@login_required
+def chat_page(request):
+    context = {}
+    
+    if request.method == "POST":
+        user_prompt = request.POST.get("prompt")
+        
+        if user_prompt:
+            try:
+                answer = call_gemini(user_prompt)
+                context['answer'] = answer
+            except Exception as e:
+                context['answer'] = f"Error: {str(e)}"
+                
+    return render(request, "classes/chat_page.html", context)

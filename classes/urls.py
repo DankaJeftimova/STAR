@@ -13,6 +13,6 @@ urlpatterns = [
     path("take_quiz/<int:pk>", views.take_quiz, name="take_quiz"),
     path("submit_quiz/<int:pk>", views.submit_quiz, name="submit_quiz"),
     path("log_out/", views.log_out, name="log_out"),
-    path("profile_settings/<int:pk>", views.profile_settings, name="profile_settings"),
     path("manage/<int:class_pk>/dismiss/<int:user_pk>/", views.dismiss, name="dismiss"),
+    path('chat_page/', views.chat_page, name='chat_page'),
 ]

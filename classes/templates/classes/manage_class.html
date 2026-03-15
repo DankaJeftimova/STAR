@@ -67,16 +67,16 @@
         </div>
         <div class="text-end">
             <p class="small text-secondary mb-2">Authenticated: {{ user.username }}</p>
-            <form action="{% url 'classes:profile_settings' request.user.pk %}" method="post">
+            <form action="{% url 'accounts:profile_settings' request.user.pk %}" method="post">
                 {% csrf_token %}
-                <button type="submit" class="your-button-styles">
+                <button type="submit" class="btn btn-outline-success btn-sm w-100">
                     Profile Settings
                 </button>
             </form>
-
+<br>
             <form action="{% url 'classes:log_out' %}" method="post">
                 {% csrf_token %}
-                <button type="submit" class="your-button-styles">
+                <button type="submit" class="btn btn-outline-danger btn-sm w-100">
                     Log Out
                 </button>
             </form>
